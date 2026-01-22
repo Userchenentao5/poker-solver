@@ -21,50 +21,56 @@
 ## Phase 1: 核心场景 MVP (1-2 天)
 
 ### Task 1: 数据目录结构
-- [ ] 创建 `server/src/data/bts/` 目录
-- [ ] 创建 `open/` 和 `facing-open/` 子目录
-- [ ] 状态: 待开始
+- [x] 创建 `server/src/data/bts/` 目录
+- [x] 创建 `open/` 和 `facing-open/` 子目录
+- [x] 状态: ✅ 完成 (2026-01-22)
 
 ### Task 2: 手动转换核心场景数据
-- [ ] `btn.json` - BTN Open Raising 范围
-- [ ] `bb-vs-btn.json` - BB 面对 BTN Open
-- [ ] `bb-vs-utg.json` - BB 面对 UTG Open
-- [ ] 状态: 待开始
+- [x] `btn.json` - BTN Open Raising 范围
+- [x] `bb-vs-btn.json` - BB 面对 BTN Open
+- [x] `bb-vs-utg.json` - BB 面对 UTG Open
+- [x] 状态: ✅ 完成 (2026-01-22)
 
 ### Task 3: 实现 Strategy API
-- [ ] 创建 `server/src/routes/strategy.ts`
-- [ ] 实现 `GET /api/strategy` 端点
-- [ ] 实现场景数据加载逻辑
-- [ ] 状态: 待开始
+- [x] 创建 `server/src/routes/strategy.ts`
+- [x] 实现 `GET /api/strategy` 端点
+- [x] 实现场景数据加载逻辑
+- [x] 状态: ✅ 完成 (2026-01-22)
 
 ### Task 4: 实现 Scenarios API
-- [ ] 创建 `server/src/routes/scenarios.ts`
-- [ ] 实现 `GET /api/scenarios` 端点
-- [ ] 创建场景索引文件 `scenarios.json`
-- [ ] 状态: 待开始
+- [x] 创建 `server/src/routes/scenarios.ts`
+- [x] 实现 `GET /api/scenarios` 端点
+- [x] 创建场景索引文件 `scenarios.json`
+- [x] 状态: ✅ 完成 (2026-01-22)
 
 ### Task 5: 前端场景选择器
-- [ ] 创建 `web/src/components/ScenarioSelector.tsx`
-- [ ] 实现位置和场景类型选择 UI
-- [ ] 状态: 待开始
+- [x] 创建 `web/src/components/ScenarioSelector.tsx`
+- [x] 实现位置和场景类型选择 UI
+- [x] 状态: ✅ 完成 (2026-01-22)
 
 ### Task 6: 前端 BTS Strategy Hook
-- [ ] 创建 `web/src/hooks/useBTSStrategy.ts`
-- [ ] 实现策略数据获取逻辑
-- [ ] 添加 loading/error 状态处理
-- [ ] 状态: 待开始
+- [x] 创建 `web/src/hooks/useBTSStrategy.ts`
+- [x] 实现策略数据获取逻辑
+- [x] 添加 loading/error 状态处理
+- [x] 状态: ✅ 完成 (2026-01-22)
 
 ### Task 7: 前端集成
-- [ ] 修改 `web/src/components/GameFlow.tsx`
-- [ ] 集成 ScenarioSelector 和 useBTSStrategy
-- [ ] 移除 useCfrStrategy（或保留作为可选）
-- [ ] 状态: 待开始
+- [x] 修改 `web/src/components/GameFlow.tsx`
+- [x] 集成 ScenarioSelector 和 useBTSStrategy
+- [x] 保留 useCfrStrategy 作为可选（模式切换）
+- [x] 状态: ✅ 完成 (2026-01-22)
 
 ### Task 8: 端到端测试
-- [ ] 测试完整流程：选择场景 → 显示策略
-- [ ] 验证数据准确性
-- [ ] 修复发现的问题
-- [ ] 状态: 待开始
+- [x] 测试完整流程：选择场景 → 显示策略
+- [x] 验证数据准确性
+- [x] 修复发现的问题
+- [x] 状态: ✅ 完成 (2026-01-22)
+
+**测试结果**：
+- ✅ /api/scenarios - 返回所有可用场景
+- ✅ /api/strategy?positionA=BTN&positionB=BB&type=FACING_OPEN - 返回 BB vs BTN 策略
+- ✅ /api/strategy?positionA=BTN&type=OPEN - 返回 BTN Open Raising 策略
+- ✅ 数据格式正确（169x3 矩阵 + 动作标签 + 摘要）
 
 ---
 
@@ -184,15 +190,15 @@ web/src/
 
 ## 进度追踪
 
-### Phase 1: 核心场景 MVP
-- [ ] Task 1: 数据目录结构
-- [ ] Task 2: 手动转换核心场景数据
-- [ ] Task 3: Strategy API
-- [ ] Task 4: Scenarios API
-- [ ] Task 5: 场景选择器
-- [ ] Task 6: BTS Strategy Hook
-- [ ] Task 7: 前端集成
-- [ ] Task 8: 端到端测试
+### Phase 1: 核心场景 MVP ✅ 完成 (2026-01-22)
+- [x] Task 1: 数据目录结构
+- [x] Task 2: 手动转换核心场景数据
+- [x] Task 3: Strategy API
+- [x] Task 4: Scenarios API
+- [x] Task 5: 场景选择器
+- [x] Task 6: BTS Strategy Hook
+- [x] Task 7: 前端集成
+- [x] Task 8: 端到端测试
 
 ### Phase 2: 扩展场景
 - [ ] Task 9: 所有 Open Raising 场景
