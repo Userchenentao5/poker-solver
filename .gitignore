@@ -8,3 +8,6 @@
 # Logs
 *.log
 hook-debug.log
+
+# Claude Code local settings
+.claude/settings.local.json
