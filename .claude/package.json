@@ -1,0 +1,14 @@
+{
+  "name": "poker-solver-claude-utils",
+  "version": "1.0.0",
+  "description": "Claude Code 会话管理和开发状态跟踪工具",
+  "type": "module",
+  "scripts": {
+    "session": "tsx session-loader.ts",
+    "show-plan": "tsx session-loader.ts",
+    "show-notes": "echo \"=== 开发注意事项 ===\" && cat ../DEVELOPMENT_NOTES.md"
+  },
+  "devDependencies": {
+    "tsx": "^4.7.0"
+  }
+}

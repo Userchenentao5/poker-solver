@@ -1,1 +1,10 @@
 .worktrees/
+.mcp.json
+
+# Node modules
+.claude/node_modules/
+*/node_modules/
+
+# Logs
+*.log
+hook-debug.log
