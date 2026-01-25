@@ -147,6 +147,15 @@ const keywordSkillMap = [
     reason: "检测到开发分支完成场景",
     confidence: 0.7
   },
+  // ==================== 创建 PR ====================
+  {
+    positive: [/\/create-pr|create.*pr|创建.*pr|创建.*pull.*request|pr|pull request/i, /git.*push/i],
+    descriptive: [/提交.*pr|发起.*pr|申请.*合并/i],
+    negative: [/^(查看|显示|列出|是什么|如何|what|how|list|show)/i],
+    skill: "create-pr",
+    reason: "检测到创建 Pull Request 需求",
+    confidence: 0.8
+  },
   // ==================== 代码审查 ====================
   {
     positive: [/审查代码|code review|检查代码|review/i],
