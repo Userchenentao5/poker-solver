@@ -7,7 +7,7 @@
 
 # Logs
 *.log
-hook-debug.log
+.claude/logs/
 
 # Claude Code local settings
 .claude/settings.local.json

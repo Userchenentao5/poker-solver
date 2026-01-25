@@ -2,6 +2,61 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+---
+
+## 📋 MANDATORY: Skill Assessment Workflow
+
+**CRITICAL**: On EVERY user request, you MUST perform the following skill assessment:
+
+### Step 1: Check for Trigger Keywords
+
+Scan the user's input for these patterns:
+
+| Keywords | Trigger Skill |
+|----------|--------------|
+| 修复、fix、调试、问题、bug、错误、异常 | `superpowers:systematic-debugging` |
+| 实现、添加、创建、implement、add | `superpowers:test-driven-development` |
+| UI、界面、组件、热力图、样式、React | `frontend-design` |
+| 设计、构思、探索、brainstorm | `superpowers:brainstorming` |
+| 规划、计划、如何实现、怎么写 | `superpowers:writing-plans` |
+| 验证、检查、测试、verify | `superpowers:verification-before-completion` |
+
+### Step 2: Output Assessment Log
+
+Always output in this format:
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📊 技能评估
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎯 用户请求: [用户输入摘要]
+
+✅ 触发的技能:
+   - [技能名] - [理由]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+If no skills triggered:
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📊 技能评估
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎯 用户请求: [用户输入摘要]
+
+✅ 无需特殊技能
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+### Step 3: Activate Skills
+
+**If any skill was triggered**, use the Skill tool to activate it BEFORE responding to the user.
+
+---
+
 ## Project Overview
 
 A local poker preflop GTO (Game Theory Optimal) solver with a three-tier architecture:
