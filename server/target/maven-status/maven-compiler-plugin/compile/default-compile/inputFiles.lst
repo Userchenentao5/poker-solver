@@ -1,0 +1,14 @@
+C:\Users\30952\Desktop\poker solver\server\src\main\java\com\poker\bts\config\CacheConfig.java
+C:\Users\30952\Desktop\poker solver\server\src\main\java\com\poker\bts\exception\GlobalExceptionHandler.java
+C:\Users\30952\Desktop\poker solver\server\src\main\java\com\poker\bts\model\HandAction.java
+C:\Users\30952\Desktop\poker solver\server\src\main\java\com\poker\bts\exception\ScenarioNotFoundException.java
+C:\Users\30952\Desktop\poker solver\server\src\main\java\com\poker\bts\model\Scenario.java
+C:\Users\30952\Desktop\poker solver\server\src\main\java\com\poker\bts\config\WebConfig.java
+C:\Users\30952\Desktop\poker solver\server\src\main\java\com\poker\bts\model\StrategyData.java
+C:\Users\30952\Desktop\poker solver\server\src\main\java\com\poker\bts\PokerBtsApplication.java
+C:\Users\30952\Desktop\poker solver\server\src\main\java\com\poker\bts\controller\ScenariosController.java
+C:\Users\30952\Desktop\poker solver\server\src\main\java\com\poker\bts\service\StrategyService.java
+C:\Users\30952\Desktop\poker solver\server\src\main\java\com\poker\bts\model\ScenarioType.java
+C:\Users\30952\Desktop\poker solver\server\src\main\java\com\poker\bts\controller\StrategyController.java
+C:\Users\30952\Desktop\poker solver\server\src\main\java\com\poker\bts\model\Position.java
+C:\Users\30952\Desktop\poker solver\server\src\main\java\com\poker\bts\repository\StrategyRepository.java

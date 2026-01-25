@@ -72,41 +72,22 @@ The project uses git worktrees. Active development is in `.worktrees/preflop-mvp
 
 **AFTER completing any task**: You MUST update documentation.
 
-### Pre-Task Planning (REQUIRED)
+### Task Planning (REQUIRED)
 
 Before starting any non-trivial task:
-
 1. **Use TodoWrite** to break down the task into steps
-2. **Set current task** using development state tracker: `npm run set-task "task description"`
-3. **Add next steps** if needed: `npm run add-step "step description"`
-
-Example:
-```
-User: "实现用户登录功能"
-AI: [Uses TodoWrite to create:
-  1. 创建登录 API 端点
-  2. 实现验证逻辑
-  3. 编写测试
-  4. 更新文档]
-   [Then runs: npm run set-task "实现用户登录功能"]
-```
+2. **Track progress** by updating todo status as you work
 
 ### Post-Task Update (REQUIRED)
 
 After completing ANY task:
-
 1. **Update TodoWrite** - Mark task as completed
-2. **Update `CURRENT_EXECUTION_PLAN.md`**:
+2. **Update `BTS_EXECUTION_PLAN.md`**:
    - Mark the task as ✅ complete
    - Add files created/modified to the change record
    - Update the "最后更新" timestamp
-3. **Verify** the plan reflects reality before moving to next task
-4. **Check** `CLAUDE.md` Current Status section is accurate
-5. **Save development state**: `npm run save-state`
 
 **If you discover completed work not documented**: Update the docs immediately, then continue.
-
-**This has happened multiple times. DO NOT skip this step.**
 
 ## Common Commands
 
@@ -124,28 +105,6 @@ cd server
 npm run dev      # Run with ts-node (direct TypeScript execution)
 npm test         # Run Node.js built-in tests
 ```
-
-### Development State Tracker
-```bash
-# From .claude/ directory - tracks project development state manually
-# Complements Claude Code's automatic session management
-
-cd .claude
-npm run show-state              # Show current development state
-npm run save-state              # Save current state
-npm run set-task "task desc"    # Set current task
-npm run add-step "step desc"    # Add next action
-npm run track-file "path"       # Record file modification
-npm run clear-state             # Clear all state
-```
-
-**Usage Guidelines**:
-- **Session start**: When user says "显示开发状态" or "show development state", run `npm run show-state`
-- **Before token limit**: When user says "保存状态" or "save state", run `npm run save-state`
-- **Task tracking**: When user sets a task, run `npm run set-task "description"`
-- **Progress tracking**: When user adds next steps, run `npm run add-step "description"`
-
-**Purpose**: Tracks project-level state (current task, modified files, next steps) separate from Claude Code's dialogue session management.
 
 ### Session Loader (会话启动加载器)
 ```bash
@@ -170,9 +129,8 @@ npm run show-plan       # Alias for npm run session
 - **快速概览**: 需要快速了解项目当前状态时运行
 
 **技术说明**:
-- 自动解析 `CURRENT_EXECUTION_PLAN.md` 提取任务进度
+- 自动解析 `BTS_EXECUTION_PLAN.md` 提取任务进度
 - 自动解析 `CLAUDE.md` 提取项目架构和命令
-- 自动解析 `DEVELOPMENT_NOTES.md` 提取关键注意事项
 - 支持调试模式: `DEBUG=1 npm run session`
 
 ### Web UI (Vite/React)
@@ -217,6 +175,7 @@ The tree follows RFI → 3bet → 4bet → 5bet hierarchy.
 - `server/src/routes/solve.ts` - Main solve API endpoint
 - `web/src/components/Heatmap.tsx` - 13x13 grid visualization
 - `web/src/components/FrequencyBars.tsx` - Action frequency display
+- `docs/API.md` - Backend API documentation (Spring Boot REST API)
 
 ## Test-Driven Development
 
@@ -224,18 +183,17 @@ The project follows TDD as outlined in `docs/plans/2026-01-13-preflop-gto-solver
 
 ## Current Status
 
-MVP is **functionally complete**. The CFR algorithm is fully implemented in `solver/src/preflop_optimized.rs` with:
-- Kuhn Poker CFR verification (`cfr.rs`)
-- Basic preflop CFR (`preflop.rs`)
-- Optimized CFR with smart sampling (`preflop_optimized.rs`)
-- Full-stack integration: Rust CLI → Server API → React UI
-- Server-side caching (TTL: 1 hour, max 100 entries)
-- **Development state tracker** (`.claude/dev-state-tracker.ts`):
-  - Manual CLI tool for tracking project-level state
-  - Commands: show-state, save-state, set-task, add-step, track-file
-  - Complements Claude Code's automatic session management
+The project has pivoted to a **BTS (Bluff The Spot) preflop strategy system**:
+- Using pre-computed GTO strategy data instead of real-time CFR calculation
+- Server acts as data query service
+- Frontend UI remains unchanged
 
-See `CURRENT_EXECUTION_PLAN.md` for detailed task status.
+**Phase 1 (Core MVP)** is complete:
+- ✅ Core scenario data converted (BTN Open, BB vs BTN, BB vs UTG)
+- ✅ Strategy API and Scenarios API implemented
+- ✅ Frontend scenario selector and BTS strategy hook integrated
+
+See `BTS_EXECUTION_PLAN.md` for detailed task status.
 
 ## Avoiding Session Termination
 
@@ -311,86 +269,6 @@ To prevent session termination:
 ```
 
 **Key Principle**: In a flex row with `gap`, all items must use the same sizing method for alignment. Using `flex: 1 1 auto` on both ensures proportional scaling and perfect alignment.
-
----
-
-## Development State Tracker
-
-**Purpose**: Manually track project development state to resume work across Claude Code sessions.
-
-**Location**: `.claude/` directory
-
-### How It Works
-
-The development state tracker is a **manual CLI tool** that you can invoke during conversations. It complements Claude Code's built-in session management:
-
-| Claude Code Session | Development State Tracker |
-|---------------------|--------------------------|
-| Dialogue history/context | Project state (todos, files, next steps) |
-| Cross-session continuity | Development progress records |
-| Automatic management | Manual/on-demand usage |
-| Conversation-level | Project-level |
-
-### Usage
-
-**Show current state**:
-```
-用户: 显示开发状态
-AI: [runs `npm run show-state`]
-```
-
-**Save before token limit**:
-```
-用户: 保存状态
-AI: [runs `npm run save-state`]
-```
-
-**Set current task**:
-```
-用户: 设置当前任务为"实现用户登录"
-AI: [runs `npm run set-task "实现用户登录"`]
-```
-
-**Add next step**:
-```
-用户: 添加下一步：编写测试
-AI: [runs `npm run add-step "编写测试"`]
-```
-
-**Track file modification**:
-```
-用户: 记录修改了 src/auth.ts
-AI: [runs `npm run track-file "src/auth.ts"`]
-```
-
-### State File
-
-Location: `.claude/.claude/dev-state.json`
-
-```json
-{
-  "version": "1.0",
-  "lastUpdated": "2026-01-18T19:38:36.274Z",
-  "currentTask": {
-    "description": "实现用户登录",
-    "context": { "lastFiles": [], "lastCommand": "" }
-  },
-  "todos": [],
-  "modifiedFiles": [
-    { "path": "src/auth.ts", "timestamp": "...", "changeType": "edit", "summary": "..." }
-  ],
-  "nextSteps": ["编写测试", "提交代码"],
-  "tokenUsage": { "estimated": 0, "limit": 200000, "percentage": 0 },
-  "project": "poker-solver"
-}
-```
-
-### When to Use
-
-1. **Session start**: Check where you left off
-2. **Before token limit**: Save current progress
-3. **Completing a task**: Update state before moving on
-4. **Planning**: Track next steps for future sessions
 
 ---
 
