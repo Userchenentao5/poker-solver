@@ -1,1 +1,13 @@
 .worktrees/
+.mcp.json
+
+# Node modules
+.claude/node_modules/
+*/node_modules/
+
+# Logs
+*.log
+.claude/logs/
+
+# Claude Code local settings
+.claude/settings.local.json
