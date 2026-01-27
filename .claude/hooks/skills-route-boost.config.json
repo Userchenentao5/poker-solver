@@ -1,0 +1,75 @@
+{
+  "thresholds": {
+    "full": 9,
+    "light": 3
+  },
+  "full": {
+    "minChars": 60,
+    "veryShortThreshold": 40,
+    "requireNotPureQuestionStart": true
+  },
+  "modeOverrides": {
+    "full": "(^|\\s)#(full|workflow)\\b|严格工作流|按.*工作流|全流程开发|端到端",
+    "light": "(^|\\s)#(light|quick)\\b|小问题|快速|顺手",
+    "reset": "(^|\\s)#(reset_workflow|workflow_off)\\b|结束工作流|退出工作流"
+  },
+  "weights": {
+    "codeBlock": 4,
+    "stackTrace": 4,
+    "filePath": 2,
+    "multiFilePath": 3,
+
+    "gitOps": 2,
+    "tests": 2,
+    "explicitDevVerbs": 3,
+    "planningWords": 2,
+    "workflowWords": 4,
+    "numberedList": 1,
+
+    "tddWords": 4,
+    "prWords": 2,
+    "writingWords": 2,
+
+    "pureQuestionStart": -3,
+    "veryShort": -2,
+    "noActionWords": -2
+  },
+  "patterns": {
+    "codeBlock": "```[\\s\\S]*?```",
+    "stackTrace": "\\bTraceback\\b|\\bStack trace\\b|\\bException\\b|\\bError:\\b|\\bat\\s+\\S+\\(\\S+:\\d+\\)",
+    "filePath": "(^|[\\s(])([A-Za-z]:\\\\\\\\|/)[^\\s]+|(^|[\\s(])(\\.\\.?/)[^\\s]+",
+
+    "gitOps": "\\b(git|commit|push|pull|fetch|clone|merge|rebase|cherry-pick|worktree|branch|pr)\\b|pull\\s+request",
+    "tests": "\\b(test|tests|vitest|jest|junit|pytest|coverage|ci)\\b",
+
+    "tddWords": "(严格.*TDD|\\bTDD\\b|red\\s*-?\\s*green\\s*-?\\s*refactor)",
+    "prWords": "(提交\\s*PR|创建\\s*PR|pull request|ready to merge)",
+
+    "explicitDevVerbs": "(实现|新增|添加|开发|重构|改造|修复|排查|调试|落地|对接|集成|编写|生成|更新|优化|部署|发布|回滚|合并|分支)",
+    "planningWords": "(方案|设计|计划|拆解|步骤|roadmap|\\bplan\\b)",
+    "workflowWords": "(整套|全流程|端到端|workflow|工作流|严格工作流|按.*流程)",
+    "pureQuestionStart": "^\\s*(是什么|为什么|为啥|如何|怎么|能否|是否|what|why|how)\\b",
+    "numberedList": "^\\s*(\\d+[\\.\\)]|-|\\*)\\s+",
+    "actionWordAnywhere": "(实现|新增|添加|开发|重构|改造|修复|排查|调试|写|做|完成|提交|合并|发布|执行)",
+    
+    "debugWords": "(报错|异常|失败|不生效|无法|error|exception|traceback|stack)",
+    "reviewWords": "(\\breview\\b|代码审查|审查|帮我看看|请看一下|code\\s*review|\\bCR\\b)",
+    "designWords": "(前端|ui|ux|figma|layout|样式|css|tailwind|组件|react|vite|storybook)",
+    "claudePluginWords": "(claude|hooks?|UserPromptSubmit|Stop\\s*hook|\\.claude|skills?|superpowers|hookify|plugin)",
+    "nodeWords": "(nvm|node|npm|pnpm|yarn|nodejs)",
+    "jsModuleWords": "\\b(cjs|commonjs|esm|mjs|import|export|require)\\b",
+    "verifyWords": "(验证|确认|测试|verify|test|assert|coverage|ci)",
+    "implementWords": "(实现|新增|添加|开发|重构|改造|create|implement|build|add|生成)",
+    "executePlanWords": "(执行计划|按计划|follow plan|execute plan)",
+    "writingWords": "(写(文案|说明|描述)|撰写|写作|写作规范|清晰.*简洁|commit.*message|提交信息|document|description|comment)"
+  },
+  "lightRouting": {
+    "maxCandidates": 2
+  },
+  "stopGuard": {
+    "blockOnMissingReview": true,
+    "tailBytes": 1048576,
+    "wfReportStart": "[WF_REPORT]",
+    "wfReportEnd": "[/WF_REPORT]"
+  }
+}
