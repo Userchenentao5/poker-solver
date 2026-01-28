@@ -1,0 +1,10 @@
+{
+  "open": ["UTG", "HJ", "CO", "BTN", "SB"],
+  "facingOpen": {
+    "BB": ["UTG", "HJ", "CO", "BTN", "SB"],
+    "SB": ["UTG", "HJ", "CO", "BTN"],
+    "BTN": ["UTG", "HJ", "CO"],
+    "CO": ["UTG", "HJ"],
+    "HJ": ["UTG"]
+  }
+}

@@ -4,96 +4,77 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ---
 
-## 📋 MANDATORY: Skill Assessment Workflow
+# 强制执行层
 
-**CRITICAL**: On EVERY user request, you MUST perform the following skill assessment:
+> 这些规则**必须始终遵循**，无论任务大小。
 
-### Step 1: Check for Trigger Keywords
+## 📋 Mandatory: Workflow Contract
 
-Scan the user's input for these patterns:
+#### Modes
+- FULL: Hook-enforced sequential workflow. MUST invoke exactly ONE <skill> per turn (the next phase).
+- LIGHT: Hook provides advisory routing (primary <skill> + candidate hint). Model may invoke any relevant skills as needed.
+- NONE: No workflow injected by hook. Model may still invoke skills if relevant.
 
-| Keywords | Trigger Skill |
-|----------|--------------|
-| 修复、fix、调试、问题、bug、错误、异常 | `superpowers:systematic-debugging` |
-| 实现、添加、创建、implement、add | `superpowers:test-driven-development` |
-| UI、界面、组件、热力图、样式、React | `frontend-design` |
-| 设计、构思、探索、brainstorm | `superpowers:brainstorming` |
-| 规划、计划、如何实现、怎么写 | `superpowers:writing-plans` |
-| 验证、检查、测试、verify | `superpowers:verification-before-completion` |
+#### FULL Workflow Phases (strict)
+BRAINSTORMING -> WORKTREES -> PLANNING -> EXECUTING -> IMPLEMENTING_TDD -> CODE_REVIEW -> (loop EXECUTING...) -> FINISHING -> DONE
 
-### Step 2: Output Assessment Log
+- IMPLEMENTING_TDD uses: superpowers:test-driven-development
+- CODE_REVIEW uses: superpowers:requesting-code-review
+- If pending_review=true, CODE_REVIEW MUST happen before any next task.
 
-Always output in this format:
+#### FULL Instrumentation (required)
+At the end of every assistant reply in FULL mode, output:
 
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📊 技能评估
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[WF_REPORT]
+events=DESIGN_APPROVED|WORKTREE_READY|PLAN_APPROVED|TASK_DONE|REVIEW_DONE|READY_TO_FINISH|FINISHED
+notes=<optional>
+[/WF_REPORT]
 
-🎯 用户请求: [用户输入摘要]
+Stop Hook uses this to advance phases and to enforce review-after-task.
 
-✅ 触发的技能:
-   - [技能名] - [理由]
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
-
-If no skills triggered:
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📊 技能评估
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-🎯 用户请求: [用户输入摘要]
-
-✅ 无需特殊技能
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
-
-### Step 3: Activate Skills
-
-**If any skill was triggered**, use the Skill tool to activate it BEFORE responding to the user.
+#### Slash commands
+If user input starts with a slash command (e.g. /commit), hooks should not interfere.
 
 ---
 
-## Project Overview
+## ⚠️ Critical: Task Execution Workflow
 
-A local poker preflop GTO (Game Theory Optimal) solver with a three-tier architecture:
-- **Rust core** (`solver/`) - Performs CFR-based calculations, exposes JSON CLI interface
-- **Node/Express API** (`server/`) - Middleware between UI and solver, handles caching
-- **React UI** (`web/`) - Renders 13x13 heatmaps and action frequency bars
+**BEFORE starting any task**: Use `TodoWrite` to plan and track progress.
 
-The project uses git worktrees. Active development is in `.worktrees/preflop-mvp/`. When running commands or navigating files, use the worktree path.
+**AFTER completing any task**: Update documentation (`BTS_EXECUTION_PLAN.md`).
 
-## ⚠️ CRITICAL: Task Execution Workflow
+---
 
-**BEFORE starting any task**: You MUST use TodoWrite to plan and track progress.
+## 🛡️ Session Termination Prevention
 
-**AFTER completing any task**: You MUST update documentation.
+**Windows `taskkill` Syntax Error**:
 
-### Pre-Task Planning (REQUIRED)
+- ❌ `taskkill /F /IM node.exe` (interprets `/F` as path)
+- ✅ `Stop-Process -Name node -Force` (PowerShell)
+- ✅ `taskkill //F //IM node.exe` (double slashes)
 
-Before starting any non-trivial task:
+**Safe Operation Guidelines**:
+1. Prefer language tools (`cargo`, `npm`) over system commands
+2. Verify before executing (`cargo check`, `npx tsx -e "..."`)
+3. Use read-only commands when possible
+4. Handle port conflicts gracefully
 
-1. **Use TodoWrite** to break down the task into steps
-2. **Set current task** using development state tracker: `npm run set-task "task description"`
-3. **Add next steps** if needed: `npm run add-step "step description"`
+---
 
-Example:
-```
-User: "实现用户登录功能"
-AI: [Uses TodoWrite to create:
-  1. 创建登录 API 端点
-  2. 实现验证逻辑
-  3. 编写测试
-  4. 更新文档]
-   [Then runs: npm run set-task "实现用户登录功能"]
-```
+# 高频召回层
 
-### Post-Task Update (REQUIRED)
+> 快速参考信息，每次会话开始时自动加载。
 
-After completing ANY task:
+## 项目架构
+
+三层架构扑克翻前前 GTO 求解器：
+- **Rust Core** (`solver/`) - CFR 计算 + JSON CLI
+- **Node/Express API** (`server/`) - 中间层 + 缓存
+- **React UI** (`web/`) - 13×13 热力图可视化
+
+> 当前工作目录: `.worktrees/preflop-mvp/`
+
+## 关键技术栈
 
 1. **Update TodoWrite** - Mark task as completed
 2. **Update `BST_EXECUTION_PLAN.md`**:
@@ -102,7 +83,7 @@ After completing ANY task:
    - Update the "最后更新" timestamp
 3. **Verify** the plan reflects reality before moving to next task
 
-**If you discover completed work not documented**: Update the docs immediately, then continue.
+## 核心编程约定
 
 
 ## File Locations
@@ -131,47 +112,37 @@ The project follows TDD as outlined in `docs/plans/2026-01-13-preflop-gto-solver
 
 **Error**: Windows interprets `/F` as a path (`F:/`) rather than the force flag.
 
-**DO NOT use**:
-```bash
-taskkill /F /IM node.exe  # WRONG - will fail and may terminate session
-```
+# 按需查询层
 
-**USE INSTEAD**:
-```bash
-# Option 1: Use PowerShell
-Stop-Process -Name node -Force
+> 详细文档使用**链接引用**，避免 Context Rot。
 
-# Option 2: Use proper Windows syntax
-taskkill //F //IM node.exe
+## 详细架构文档
 
-# Option 3: Check port and use different port instead
-netstat -ano | findstr :3001
-# Then use a different port if occupied
-```
+- [执行计划与任务状态](./BTS_EXECUTION_PLAN.md)
+- [原始实现计划](./docs/plans/2026-01-13-preflop-gto-solver-implementation-plan.md)
 
-#### 2. Safe Operation Guidelines
+## API 参考
 
-To prevent session termination:
+- [Backend API 文档](./docs/API.md)
 
-1. **Prefer language tools over system commands**
-   - Use `cargo`, `npm`, `npx` instead of direct process management
-   - Use `curl` for HTTP checks instead of complex scripts
+## 历史决策记录
 
-2. **Verify before executing**
-   - Use `npx tsx -e "import(...)"` to verify module syntax before running full server
-   - Use `cargo check` before `cargo build` for quick syntax validation
+- 详见 `BTS_EXECUTION_PLAN.md` 中的变更记录
 
-3. **Use read-only commands when possible**
-   - `grep`, `cat`, `head` are safer than commands that modify state
-   - Test with `--dry-run` flags if available
+## 文件位置映射
 
-4. **Handle port conflicts gracefully**
-   - Check if port is occupied: `netstat -ano | findstr :PORT`
-   - Use environment variable to specify alternative port
-   - Let the user handle process management manually
+| Component | File Path |
+|-----------|-----------|
+| Hand mapping | `solver/src/hand.rs` |
+| Action tree | `solver/src/game_tree.rs` |
+| Solver core | `solver/src/solver.rs` |
+| CLI interface | `solver/src/bin/solver_cli.rs` |
+| Solve endpoint | `server/src/routes/solve.ts` |
+| Heatmap component | `web/src/components/Heatmap.tsx` |
+| Frequency bars | `web/src/components/FrequencyBars.tsx` |
 
 ---
 
-## Hooks Configuration
+## Hooks 配置
 
 **Location**: `.claude/settings.local.json`

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useScenarios } from '../hooks/useScenarios';
 
 export type Position = 'UTG' | 'HJ' | 'CO' | 'BTN' | 'SB' | 'BB';
 export type ScenarioType = 'OPEN' | 'FACING_OPEN';
@@ -14,12 +15,12 @@ interface ScenarioSelectorProps {
   currentScenario?: Scenario;
 }
 
-const POSITIONS: Position[] = ['UTG', 'HJ', 'CO', 'BTN', 'SB', 'BB'];
-
 export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
   onScenarioChange,
   currentScenario
 }) => {
+  const { scenarios, loading, error } = useScenarios();
+
   const [positionA, setPositionA] = React.useState<Position>(
     currentScenario?.positionA || 'BTN'
   );
@@ -30,12 +31,45 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
     currentScenario?.type || 'OPEN'
   );
 
+  // Get available options based on scenario type and loaded data
+  const getAvailablePositionsForA = (): Position[] => {
+    if (!scenarios) return ['UTG', 'HJ', 'CO', 'BTN', 'SB', 'BB'];
+
+    if (scenarioType === 'OPEN') {
+      return scenarios.open as Position[];
+    } else {
+      // FACING_OPEN: positionA is the defender position
+      return Object.keys(scenarios.facingOpen) as Position[];
+    }
+  };
+
+  // Get valid positionB options based on positionA for FACING_OPEN
+  const getAvailablePositionsForB = (): Position[] => {
+    if (!scenarios || scenarioType !== 'FACING_OPEN') {
+      return ['UTG', 'HJ', 'CO', 'BTN', 'SB', 'BB'];
+    }
+
+    // Get valid opponents for current positionA (defender)
+    const validOpponents = scenarios.facingOpen[positionA];
+    return validOpponents as Position[];
+  };
+
   const handlePositionAChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newPosA = e.target.value as Position;
     setPositionA(newPosA);
+
+    // Reset positionB when switching positionA in FACING_OPEN mode
+    const newPosB = scenarioType === 'FACING_OPEN'
+      ? getAvailablePositionsForB()[0]
+      : positionB;
+
+    if (scenarioType === 'FACING_OPEN' && newPosB) {
+      setPositionB(newPosB);
+    }
+
     onScenarioChange({
       positionA: newPosA,
-      positionB: scenarioType === 'FACING_OPEN' ? positionB : undefined,
+      positionB: scenarioType === 'FACING_OPEN' ? newPosB : undefined,
       type: scenarioType
     });
   };
@@ -53,12 +87,62 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
   const handleScenarioTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newType = e.target.value as ScenarioType;
     setScenarioType(newType);
+
+    // Reset positions when switching scenario type
+    let newPosA: Position;
+    let newPosB: Position | undefined;
+
+    if (newType === 'OPEN' && scenarios) {
+      newPosA = scenarios.open[0] as Position;
+      newPosB = undefined;
+    } else if (newType === 'FACING_OPEN' && scenarios) {
+      const defenders = Object.keys(scenarios.facingOpen) as Position[];
+      newPosA = defenders[0];
+      newPosB = scenarios.facingOpen[newPosA][0] as Position;
+    } else {
+      newPosA = positionA;
+      newPosB = newType === 'FACING_OPEN' ? positionB : undefined;
+    }
+
+    setPositionA(newPosA);
+    if (newPosB) setPositionB(newPosB);
+
     onScenarioChange({
-      positionA,
-      positionB: newType === 'FACING_OPEN' ? positionB : undefined,
+      positionA: newPosA,
+      positionB: newPosB,
       type: newType
     });
   };
+
+  // Update local state when currentScenario changes externally
+  React.useEffect(() => {
+    if (currentScenario) {
+      setPositionA(currentScenario.positionA);
+      if (currentScenario.positionB) {
+        setPositionB(currentScenario.positionB);
+      }
+      setScenarioType(currentScenario.type);
+    }
+  }, [currentScenario]);
+
+  const availablePositionsA = getAvailablePositionsForA();
+  const availablePositionsB = getAvailablePositionsForB();
+
+  if (loading) {
+    return (
+      <div className="scenario-selector">
+        <div style={{ color: '#888', fontSize: 14 }}>Loading scenarios...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="scenario-selector">
+        <div style={{ color: '#D62728', fontSize: 14 }}>Error: {error}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="scenario-selector">
@@ -125,53 +209,32 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
           color: #666;
           margin: 4px 0;
         }
-
-        .position-grid {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 6px;
-          margin-top: 8px;
-        }
-
-        .position-button {
-          padding: 8px;
-          background: #2D2D2D;
-          border: 1px solid #3D3D3D;
-          border-radius: 6px;
-          color: #B0B0B0;
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-          font-size: 12px;
-          font-weight: 600;
-          cursor: pointer;
-          transition: all 0.15s ease;
-          text-align: center;
-        }
-
-        .position-button:hover {
-          background: #383838;
-          border-color: #4D4D4D;
-          color: white;
-        }
-
-        .position-button.active {
-          background: #4A9EFF;
-          border-color: #4A9EFF;
-          color: white;
-        }
       `}</style>
 
       <div className="selector-group">
         <label className="selector-label">Scenario Type</label>
-        <select className="selector-select" value={scenarioType} onChange={handleScenarioTypeChange}>
+        <select
+          className="selector-select"
+          value={scenarioType}
+          onChange={handleScenarioTypeChange}
+          disabled={!scenarios}
+        >
           <option value="OPEN">Open Raising</option>
           <option value="FACING_OPEN">Facing Open</option>
         </select>
       </div>
 
       <div className="selector-group">
-        <label className="selector-label">Your Position</label>
-        <select className="selector-select" value={positionA} onChange={handlePositionAChange}>
-          {POSITIONS.map(pos => (
+        <label className="selector-label">
+          {scenarioType === 'OPEN' ? 'Your Position' : 'Defending Position'}
+        </label>
+        <select
+          className="selector-select"
+          value={positionA}
+          onChange={handlePositionAChange}
+          disabled={!scenarios}
+        >
+          {availablePositionsA.map(pos => (
             <option key={pos} value={pos}>{pos}</option>
           ))}
         </select>
@@ -182,8 +245,13 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
           <div className="vs-label">vs</div>
           <div className="selector-group">
             <label className="selector-label">Opponent Position</label>
-            <select className="selector-select" value={positionB} onChange={handlePositionBChange}>
-              {POSITIONS.map(pos => (
+            <select
+              className="selector-select"
+              value={positionB}
+              onChange={handlePositionBChange}
+              disabled={!scenarios}
+            >
+              {availablePositionsB.map(pos => (
                 <option key={pos} value={pos}>{pos}</option>
               ))}
             </select>

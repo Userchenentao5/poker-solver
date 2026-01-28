@@ -6,9 +6,9 @@ import { Heatmap } from './Heatmap';
 
 export const GameFlow: React.FC = () => {
   const [scenario, setScenario] = useState<Scenario>({
-    positionA: 'BTN',
+    positionA: 'UTG',
     positionB: 'BB',
-    type: 'FACING_OPEN'
+    type: 'OPEN'
   });
   const [selectedAction, setSelectedAction] = useState(0);
   const [hoveredHand, setHoveredHand] = useState<string | null>(null);

@@ -1,0 +1,4 @@
+com\poker\bts\controller\ScenariosControllerTest.class
+com\poker\bts\controller\StrategyControllerTest.class
+com\poker\bts\service\StrategyServiceTest.class
+com\poker\bts\repository\StrategyRepositoryTest.class

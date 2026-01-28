@@ -36,11 +36,12 @@ export const useBTSStrategy = (scenario: Scenario) => {
           type: scenario.type
         });
 
+        // Only include positionB for FACING_OPEN scenarios
         if (scenario.type === 'FACING_OPEN' && scenario.positionB) {
           params.append('positionB', scenario.positionB);
         }
 
-        const response = await fetch(`http://localhost:3001/api/strategy?${params}`);
+        const response = await fetch(`http://localhost:8081/api/strategy?${params}`);
 
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));

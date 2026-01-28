@@ -74,6 +74,70 @@
 
 ---
 
+## Phase 1.5: Java Spring Boot 后端重写 (2026-01-25)
+
+### 背景
+原 Node.js/Express 后端已删除，使用 Java Spring Boot 3.2 重写后端服务。
+
+### 技术栈
+- **框架**: Spring Boot 3.2.0
+- **Java 版本**: JDK 17
+- **缓存**: Caffeine (Spring Cache 抽象)
+- **构建工具**: Maven
+- **JSON 处理**: Jackson
+
+### 新增文件
+```
+server/
+├── pom.xml                                    # Maven 配置
+├── src/main/java/com/poker/bts/
+│   ├── PokerBtsApplication.java              # 主启动类
+│   ├── controller/
+│   │   ├── StrategyController.java           # 策略 API 控制器
+│   │   └── ScenariosController.java          # 场景 API 控制器
+│   ├── service/
+│   │   └── StrategyService.java              # 业务逻辑层
+│   ├── repository/
+│   │   └── StrategyRepository.java           # 数据访问层
+│   ├── model/
+│   │   ├── Position.java                     # 位置枚举
+│   │   ├── ScenarioType.java                 # 场景类型枚举
+│   │   ├── Scenario.java                     # 场景实体
+│   │   ├── StrategyData.java                 # 策略数据
+│   │   └── HandAction.java                   # 手牌动作
+│   ├── config/
+│   │   ├── CacheConfig.java                  # Caffeine 缓存配置
+│   │   └── WebConfig.java                    # CORS 配置
+│   └── exception/
+│       ├── ScenarioNotFoundException.java    # 自定义异常
+│       └── GlobalExceptionHandler.java       # 全局异常处理
+└── src/main/resources/
+    ├── application.yml                        # 应用配置
+    └── data/
+        ├── scenarios-index.json               # 场景索引
+        └── bts/
+            ├── open/btn.json                  # BTN Open Raising 数据
+            └── facing-open/bb-vs-btn.json     # BB vs BTN 策略数据
+```
+
+### API 端点
+| 端点 | 方法 | 描述 |
+|------|------|------|
+| `/api/scenarios` | GET | 获取所有可用场景 |
+| `/api/strategy` | GET | 获取指定场景策略数据 |
+
+### 测试结果
+- ✅ `/api/scenarios` - 返回所有可用场景
+- ✅ `/api/strategy?positionA=BTN&positionB=BB&type=FACING_OPEN` - 返回 BB vs BTN 策略
+- ✅ Caffeine 缓存正常工作
+- ✅ CORS 配置正确
+- ✅ 全局异常处理生效
+
+### 状态
+✅ **完成** (2026-01-25)
+
+---
+
 ## Phase 2: 扩展场景 (2-3 天)
 
 ### Task 9: 转换所有 Open Raising 场景
@@ -144,13 +208,16 @@
 - [ ] 状态: 待开始
 
 ### Task 20: 文档编写
-- [ ] API 文档
+- [x] API 文档 (`docs/API.md`)
 - [ ] 用户使用指南
-- [ ] 状态: 待开始
+- [ ] 状态: 部分完成 (2026-01-25)
 
 ---
 
 ## 文件变更记录
+
+### 2026-01-25
+- 新增 `docs/API.md` - 后端 API 接口文档，供前端项目对接
 
 ### Phase 1 新增文件
 ```
@@ -214,9 +281,9 @@ web/src/
 - [ ] Task 17: 自动化数据转换
 - [ ] Task 18: 数据压缩
 - [ ] Task 19: 完整测试
-- [ ] Task 20: 文档编写
+- [~] Task 20: 文档编写 (API 文档已完成)
 
 ---
 
 *创建时间: 2026-01-22*
-*最后更新: 2026-01-22*
+*最后更新: 2026-01-25*

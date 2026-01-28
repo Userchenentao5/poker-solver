@@ -1,0 +1,56 @@
+{
+  "version": "1.0.0",
+  "description": "Security and quality rules for Claude Code hooks",
+  "rules": [
+    {
+      "name": "dangerous-commands",
+      "enabled": true,
+      "event": "bash",
+      "action": "warn",
+      "pattern": "(rm\\s+-rf|--force|dd\\s+if=|mkfs|chmod\\s+777|chown\\s+root|:\\(\\)\\s*{\\s*:\\|:\\&\\s*};:)",
+      "message": "## ️  危险命令检测\n\n检测到潜在危险的系统命令！\n\n### 命令分析\n- `rm -rf` - 递归强制删除，可能误删重要文件\n- `dd if=` - 直接磁盘写入，可能破坏文件系统\n- `mkfs` - 格式化文件系统，会清除所有数据\n- `chmod 777` - 过于宽松的权限，存在安全风险\n- `chown root` - 改变所有者，可能影响系统稳定性\n- Fork bomb `:(){ :|:& };:` - 资源耗尽攻击\n\n### 建议操作\n1. **仔细检查目标路径** - 确认不会删除重要文件\n2. **使用 --dry-run** - 先预览操作结果\n3. **考虑替代方案** - 使用更安全的命令\n4. **备份重要数据** - 操作前先备份\n\n### 示例\n```bash\n# 危险\nrm -rf /usr/local/*\n\n# 安全\nrm -rf ./temp_dir  # 限制范围\n# 或\nfind ./temp_dir -delete  # 更明确的操作\n```\n\n**如果确认操作安全，可以继续执行。**"
+    },
+    {
+      "name": "sensitive-files",
+      "enabled": true,
+      "event": "file",
+      "action": "warn",
+      "conditions": [
+        {
+          "field": "file_path",
+          "operator": "regex_match",
+          "pattern": "(\\.env$|credentials|\\.pem$|\\.key$|private|secret|config\\.local\\.(json|js|ts)$|\\.claude/settings\\.local\\.json$)"
+        }
+      ],
+      "message": "##  敏感文件检测\n\n正在编辑包含敏感信息的配置文件！\n\n### 检测到的文件类型\n- `.env` - 环境变量（可能包含 API 密钥、数据库凭证）\n- `credentials` - 凭证文件\n- `.pem/.key` - 私钥文件\n- `private/secret` - 私有/秘密配置\n- `config.local.*` - 本地配置文件\n- `.claude/settings.local.json` - Claude 本地设置\n\n### 安全建议\n1. **确保 .gitignore 包含这些文件**\n   ```gitignore\n   .env\n   *.local.*\n   credentials*\n   *.pem\n   *.key\n   ```\n\n2. **不要提交到版本控制**\n   - 检查 `git status` 确认这些文件未被追踪\n   - 使用 `git rm --cached` 移除已提交的敏感文件\n\n3. **使用环境变量替代硬编码**\n   ```typescript\n   // 坏\n   const apiKey = \"sk-1234567890\"\n\n   // 好\n   const apiKey = process.env.API_KEY\n   ```\n\n4. **提供示例文件**\n   ```bash\n   cp .env .env.example\n   # 然后编辑 .env.example，替换敏感值为占位符\n   ```\n\n**如果只是本地开发配置且已正确忽略，可以继续。**"
+    },
+    {
+      "name": "debug-code",
+      "enabled": true,
+      "event": "file",
+      "action": "warn",
+      "conditions": [
+        {
+          "field": "new_text",
+          "operator": "regex_match",
+          "pattern": "(console\\.(log|debug|info|warn|error|table|trace)\\(|debugger|print\\(|console\\.dir\\(|console\\.group)"
+        }
+      ],
+      "message": "##  调试代码检测\n\n正在添加调试代码到项目中！\n\n### 检测到的调试代码\n- `console.log()` - 控制台日志\n- `console.debug/info/warn/error` - 其他控制台输出\n- `console.table/trace/dir/group` - 高级调试输出\n- `debugger` - 断点调试语句\n- `print()` - 打印语句\n\n### 为什么要注意\n- 调试代码不应提交到生产环境\n- 可能暴露敏感信息（用户数据、API 响应等）\n- 影响浏览器性能（大量日志时）\n- 污染控制台输出\n\n### 建议做法\n1. **使用适当的日志库**\n   ```typescript\n   // 使用 pino、winston 等专业日志库\n   import logger from './lib/logger'\n   logger.info({ userId, action }, 'User performed action')\n   ```\n\n2. **环境变量控制**\n   ```typescript\n   const isDev = process.env.NODE_ENV === 'development'\n   if (isDev) console.log('Debug info')\n   ```\n\n3. **提交前清理**\n   ```bash\n   # 搜索调试代码\n   grep -r \"console\\.log\" src/\n   ```\n\n4. **使用 ESLint 规则**\n   ```json\n   {\n     \"rules\": {\n       \"no-console\": \"warn\",\n       \"no-debugger\": \"error\"\n     }\n   }\n   ```\n\n### 例外情况\n如果是以下场景，可以忽略此警告：\n- 新建的测试文件\n- 日志库实现文件\n- 专门的 debug 工具文件\n\n**如果确认需要添加调试代码，请记住在提交前清理。**"
+    },
+    {
+      "name": "dangerous-code",
+      "enabled": true,
+      "event": "file",
+      "action": "warn",
+      "conditions": [
+        {
+          "field": "new_text",
+          "operator": "regex_match",
+          "pattern": "(eval\\(|new Function\\(|innerHTML\\s*=|outerHTML\\s*=|dangerouslySetInnerHTML|document\\.write\\(|execScript\\(|setInterval\\([^,]*String|setTimeout\\([^,]*String)"
+        }
+      ],
+      "message": "## ⚠️ 危险代码模式检测\n\n检测到潜在的不安全代码模式！\n\n### 检测到的危险模式\n\n| 模式 | 风险等级 | 描述 |\n|------|----------|------|\n| `eval()` |  高 | 执行任意代码，XSS 风险 |\n| `new Function()` |  高 | 动态代码执行，安全问题 |\n| `innerHTML =` |  中 | XSS 攻击向量 |\n| `outerHTML =` |  中 | XSS 攻击向量 |\n| `dangerouslySetInnerHTML` |  中 | React XSS 风险 |\n| `document.write()` |  高 | 覆盖文档，性能问题 |\n| `execScript()` |  高 | 已弃用，仅 IE |\n| `setInterval(String)` |  高 | 类似 eval |\n| `setTimeout(String)` |  高 | 类似 eval |\n\n### 安全替代方案\n\n#### 1. 替代 `eval()` 和 `new Function()`\n```javascript\n// 危险\nconst result = eval('(' + userInput + ')')\n\n// 安全 - 使用 JSON.parse\nconst result = JSON.parse(userInput)\n\n// 或使用专门的解析库\nimport { parse } from 'some-parser'\nconst result = parse(userInput)\n```\n\n#### 2. 替代 `innerHTML`\n```javascript\n// 危险\nelement.innerHTML = userInput\n\n// 安全 - 使用 textContent\nelement.textContent = userInput\n\n// 或使用 DOM API\nelement.appendChild(document.createTextNode(userInput))\n\n// 对于 HTML，先清理\nimport DOMPurify from 'dompurify'\nelement.innerHTML = DOMPurify.sanitize(userInput)\n```\n\n#### 3. React 中替代 `dangerouslySetInnerHTML`\n```jsx\n// 危险\n<div dangerouslySetInnerHTML={{ __html: userInput }} />\n\n// 安全 - 使用 DOMPurify\nimport DOMPurify from 'dompurify'\n<div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(userInput) }} />\n\n// 更安全 - 避免使用，直接渲染\n<div>{userInput}</div>\n```\n\n#### 4. 替代字符串形式的 setTimeout/setInterval\n```javascript\n// 危险\nsetTimeout('alert(\"Hello\")', 1000)\n\n// 安全 - 使用函数\nsetTimeout(() => alert('Hello'), 1000)\n```\n\n### 必须使用时的注意事项\n\n如果确实需要使用这些模式：\n1. **输入验证** - 严格验证所有输入\n2. **输出编码** - 对动态内容进行编码\n3. **CSP 策略** - 配置内容安全策略\n4. **代码审查** - 必须经过团队审查\n\n**请确认是否有更安全的替代方案，或已采取适当的安全措施。**"
+    }
+  ]
+}
