@@ -76,37 +76,41 @@ If user input starts with a slash command (e.g. /commit), hooks should not inter
 
 ## 关键技术栈
 
-| Layer | Tech | Version |
-|-------|------|---------|
-| Solver | Rust | (Cargo.toml) |
-| Server | Node.js + TypeScript + Express | (package.json) |
-| Web | React + Vite | (package.json) |
+1. **Update TodoWrite** - Mark task as completed
+2. **Update `BST_EXECUTION_PLAN.md`**:
+   - Mark the task as ✅ complete
+   - Add files created/modified to the change record
+   - Update the "最后更新" timestamp
+3. **Verify** the plan reflects reality before moving to next task
 
 ## 核心编程约定
 
-- **TDD**: 先写测试，验证失败后再实现
-- **手牌表示**: 169 种标准组合 (AA, KK...AKs...AKo...)
-- **行动树**: RFI → 3bet → 4bet → 5bet 层级结构
 
-## 常用命令
+## File Locations
 
-```bash
-# Rust Solver
-cargo build -p solver
-cargo test -p solver
-cargo run -p solver --bin solver_cli
+- `solver/src/hand.rs` - Hand class label/index mapping (169 hands)
+- `solver/src/game_tree.rs` - Fixed action tree model
+- `solver/src/solver.rs` - Core solver logic (CFR implementation planned)
+- `solver/src/bin/solver_cli.rs` - JSON CLI interface
+- `server/src/routes/solve.ts` - Main solve API endpoint
+- `web/src/components/Heatmap.tsx` - 13x13 grid visualization
+- `web/src/components/FrequencyBars.tsx` - Action frequency display
 
-# Server
-cd server && npm run dev
+## Test-Driven Development
 
-# Web UI
-cd web && npm run dev
+The project follows TDD as outlined in `docs/plans/2026-01-13-preflop-gto-solver-implementation-plan.md`. Tests should be written first and verified to fail before implementation.
 
-# Session Loader
-cd .claude && npm run session
-```
+## Avoiding Session Termination
 
----
+**IMPORTANT**: Several scenarios have caused Claude Code sessions to terminate abnormally. Follow these guidelines to prevent data loss.
+
+### Known Termination Scenarios
+
+#### 1. Windows `taskkill` Command Syntax Error
+
+**Problem**: Using `taskkill /F /IM node.exe` on Windows causes the session to terminate.
+
+**Error**: Windows interprets `/F` as a path (`F:/`) rather than the force flag.
 
 # 按需查询层
 
@@ -137,25 +141,8 @@ cd .claude && npm run session
 | Heatmap component | `web/src/components/Heatmap.tsx` |
 | Frequency bars | `web/src/components/FrequencyBars.tsx` |
 
-## 已知问题
-
-### Heatmap Cell Alignment
-**问题**: 热力图单元格与轴标签对齐偏移
-
-**解决方案**: 确保标签和单元格使用相同的 flex 属性
-```css
-.heatmap-cell, .heatmap-label {
-  flex: 1 1 auto;
-  aspect-ratio: 1;
-}
-```
-
 ---
 
 ## Hooks 配置
 
 **Location**: `.claude/settings.local.json`
-
-**UserPromptSubmit Hook**: 自动评估用户请求，触发相应技能
-- Matcher: `"^(?!/).+$"` (排除斜杠命令)
-- Command: `node .claude/hooks/user-prompt-submit.cjs`
